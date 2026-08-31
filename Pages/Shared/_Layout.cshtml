@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - APUESTAS PRO | Tracker de Movimiento de Momios & Parlays</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    
+    <!-- Custom Terminal CSS -->
+    <link rel="stylesheet" href="~/css/odds-terminal.css" asp-append-version="true" />
+</head>
+<body class="terminal-body">
+    
+    <!-- Top Real-Time Live Ticker Header -->
+    <div class="odds-ticker-wrap">
+        <div class="ticker-label">
+            <span class="pulse-dot"></span> EN VIVO:
+        </div>
+        <div class="ticker-track" id="liveTickerTrack">
+            <div class="ticker-item"><span class="sport-badge">⚽ UCL</span> <strong>Real Madrid vs Man City</strong> <span class="odds-up">RM -160 (▲ +145)</span> <span class="badge bg-danger-subtle text-danger">RLM 56% Sharp</span></div>
+            <div class="ticker-item"><span class="sport-badge">🏀 NBA</span> <strong>Celtics vs Lakers</strong> <span class="odds-down">BOS -175 (▼ -220)</span> <span class="badge bg-warning-subtle text-warning">Whale Alert</span></div>
+            <div class="ticker-item"><span class="sport-badge">⚽ UCL</span> <strong>Arsenal vs Bayern</strong> <span class="odds-down">ARS -138 (▼ -105)</span> <span class="badge bg-success-subtle text-success">Steam Move</span></div>
+            <div class="ticker-item"><span class="sport-badge">🏈 NFL</span> <strong>Chiefs vs 49ers</strong> <span class="odds-up">SF +105 (▲ +135)</span> <span class="badge bg-info-subtle text-info">Reverse Line</span></div>
+            <div class="ticker-item"><span class="sport-badge">🇲🇽 LMX</span> <strong>América vs Chivas</strong> <span class="odds-down">AME -140 (▼ +105)</span> <span class="badge bg-danger-subtle text-danger">82% Money</span></div>
+        </div>
+    </div>
+
+    <!-- Main Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark terminal-navbar sticky-top">
+        <div class="container-fluid px-lg-4">
+            <a class="navbar-brand d-flex align-items-center gap-2" asp-area="" asp-page="/Index">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-chart-line-up"></i>
+                </div>
+                <div class="brand-text">
+                    <span class="brand-title">ODDS<span class="brand-accent">PULSE</span></span>
+                    <span class="brand-subtitle">PRO BETTING TERMINAL</span>
+                </div>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 nav-pills gap-1 ms-lg-4">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="javascript:void(0)" onclick="filterCategory('All', this)"><i class="fa-solid fa-globe me-1"></i> Todos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="javascript:void(0)" onclick="filterCategory('Soccer', this)"><i class="fa-solid fa-futbol me-1"></i> Fútbol</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="javascript:void(0)" onclick="filterCategory('Basketball', this)"><i class="fa-solid fa-basketball me-1"></i> Baloncesto</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="javascript:void(0)" onclick="filterCategory('AmericanFootball', this)"><i class="fa-solid fa-football me-1"></i> NFL</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="javascript:void(0)" onclick="filterCategory('Baseball', this)"><i class="fa-solid fa-baseball-bat-ball me-1"></i> Béisbol</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="javascript:void(0)" onclick="filterCategory('Tennis', this)"><i class="fa-solid fa-baseball me-1"></i> Tenis</a>
+                    </li>
+                </ul>
+
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <!-- Format Switcher -->
+                    <div class="format-switcher btn-group btn-group-sm" role="group" aria-label="Odds Format">
+                        <button type="button" class="btn btn-outline-cyber active" id="btnFmtAmerican" onclick="setOddsFormat('american')">Americano (+150)</button>
+                        <button type="button" class="btn btn-outline-cyber" id="btnFmtDecimal" onclick="setOddsFormat('decimal')">Decimal (2.50)</button>
+                        <button type="button" class="btn btn-outline-cyber" id="btnFmtProbability" onclick="setOddsFormat('probability')">Probabilidad (%)</button>
+                    </div>
+
+                    <!-- Audio Sound Effect Toggle -->
+                    <button class="btn btn-icon-terminal" id="btnSoundToggle" onclick="toggleAudio()" title="Activar/Desactivar sonido en movimiento de línea">
+                        <i class="fa-solid fa-volume-high" id="soundIcon"></i>
+                    </button>
+
+                    <!-- EV & Arbitrage Tools Modal Trigger -->
+                    <button class="btn btn-accent-cyber d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#toolsModal">
+                        <i class="fa-solid fa-calculator"></i>
+                        <span class="d-none d-sm-inline">Calculadoras +EV</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Workspace Container -->
+    <main role="main" class="pb-5">
+        @RenderBody()
+    </main>
+
+    <!-- Footer -->
+    <footer class="terminal-footer">
+        <div class="container-fluid px-lg-4 d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+            <div class="d-flex align-items-center gap-2">
+                <span class="status-indicator-live"></span>
+                <span class="text-muted small">C# Backend Engine & SignalR WebSockets Activo | Latencia: <span class="text-success fw-bold" id="pingLatency">12ms</span></span>
+            </div>
+            <div class="text-muted small">
+                &copy; 2026 <strong>ODDSPULSE PRO</strong> - Sistema Profesional de Análisis de Líneas, Dinero Inteligente y Parlays.
+            </div>
+            <div class="d-flex gap-3 text-muted small">
+                <span><i class="fa-solid fa-shield-halved text-info"></i> Vegas Consensus</span>
+                <span><i class="fa-solid fa-bolt text-warning"></i> Sub-segundo SignalR</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Chart.js and SignalR Scripts -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+    
+    <!-- Application Logic -->
+    <script src="~/js/odds-app.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

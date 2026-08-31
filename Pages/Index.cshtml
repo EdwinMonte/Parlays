@@ -1,0 +1,562 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Terminal de Movimiento de Momios & Parlays";
+}
+
+<!-- Sharp Alerts Toast Notification Stack -->
+<div class="toast-container position-fixed top-0 end-0 p-3" id="sharpAlertToastContainer" style="z-index: 2000; margin-top: 50px;"></div>
+
+<div class="container-fluid px-lg-4 mt-3">
+    
+    <!-- Top Financial & Terminal Stats Bar -->
+    <div class="market-summary-bar">
+        <div class="row g-3 align-items-center">
+            <div class="col-6 col-md-3">
+                <div class="stat-box-terminal">
+                    <div class="stat-icon green">
+                        <i class="fa-solid fa-tower-broadcast"></i>
+                    </div>
+                    <div>
+                        <div class="stat-label">Eventos Monitoreados</div>
+                        <div class="stat-val">@Model.Matches.Count</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <div class="stat-box-terminal">
+                    <div class="stat-icon red">
+                        <i class="fa-solid fa-circle-dot"></i>
+                    </div>
+                    <div>
+                        <div class="stat-label">Partidos En Vivo</div>
+                        <div class="stat-val"><span class="pulse-dot d-inline-block me-1"></span> @Model.LiveCount</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <div class="stat-box-terminal">
+                    <div class="stat-icon gold">
+                        <i class="fa-solid fa-bolt"></i>
+                    </div>
+                    <div>
+                        <div class="stat-label">Alertas Dinero Inteligente</div>
+                        <div class="stat-val">@Model.SharpActivityCount <span class="badge bg-warning-subtle text-warning fs-6">RLM</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <div class="stat-box-terminal">
+                    <div class="stat-icon cyan">
+                        <i class="fa-solid fa-chart-simple"></i>
+                    </div>
+                    <div>
+                        <div class="stat-label">Margen Promedio Casa</div>
+                        <div class="stat-val">96.8% <span class="text-info fs-6">Payout</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters & Action Bar -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <!-- Status Filter Buttons -->
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <div class="btn-group btn-group-sm" role="group">
+                <button type="button" class="btn btn-outline-cyber btn-filter-status active" onclick="filterStatus('all', this)">
+                    <i class="fa-solid fa-list-ul me-1"></i> Todos (@Model.Matches.Count)
+                </button>
+                <button type="button" class="btn btn-outline-cyber btn-filter-status" onclick="filterStatus('live', this)">
+                    <span class="pulse-dot d-inline-block me-1" style="width:6px;height:6px;"></span> En Vivo (@Model.LiveCount)
+                </button>
+                <button type="button" class="btn btn-outline-cyber btn-filter-status" onclick="filterStatus('upcoming', this)">
+                    <i class="fa-solid fa-calendar-day me-1"></i> Próximos Hoy
+                </button>
+            </div>
+
+            <!-- Sharp Action Toggle -->
+            <div class="form-check form-switch ms-2 d-flex align-items-center gap-2 m-0">
+                <input class="form-check-input" type="checkbox" id="switchSharpOnly" onchange="toggleSharpOnly(this)" style="cursor:pointer;">
+                <label class="form-check-label text-warning small fw-bold" for="switchSharpOnly" style="cursor:pointer;">
+                    <i class="fa-solid fa-bolt me-1"></i> Solo Dinero Inteligente (RLM)
+                </label>
+            </div>
+        </div>
+
+        <!-- Live Search Input -->
+        <div class="d-flex align-items-center gap-2">
+            <div class="input-group input-group-sm" style="min-width: 250px;">
+                <span class="input-group-text bg-dark border-secondary text-secondary"><i class="fa-solid fa-magnifying-glass"></i></span>
+                <input type="text" class="form-control bg-dark text-white border-secondary" placeholder="Buscar equipo o liga..." oninput="onSearchMatches(this.value)">
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Workspace: Matches Grid & Sticky Parlay Slip -->
+    <div class="row g-4">
+        
+        <!-- LEFT COLUMN: Match Cards (8 Cols) -->
+        <div class="col-lg-8">
+            <div id="matchesContainer">
+                @foreach (var match in Model.Matches)
+                {
+                    <div class="match-card-wrapper" 
+                         data-match-id="@match.Id" 
+                         data-sport="@match.Sport.ToString()" 
+                         data-status="@match.Status.ToString().ToLower()" 
+                         data-sharp="@(match.HasSharpActivity ? "true" : "false")"
+                         data-title="@match.HomeTeam @match.AwayTeam @match.League">
+                        
+                        <div class="match-card @(match.Status == Parlays.Models.EventStatus.Live ? "is-live" : "") @(match.HasSharpActivity ? "has-sharp" : "")">
+                            
+                            <!-- Card Header -->
+                            <div class="match-header">
+                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                    <span class="league-tag">
+                                        <span>@match.LeagueIcon</span>
+                                        <span>@match.League</span>
+                                    </span>
+                                    
+                                    @if (match.Status == Parlays.Models.EventStatus.Live)
+                                    {
+                                        <span class="live-badge">
+                                            <span class="pulse-dot"></span> EN VIVO @match.LiveTime
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-dark text-secondary border border-secondary-subtle">
+                                            <i class="fa-regular fa-clock me-1"></i> @match.StartTime.ToLocalTime().ToString("HH:mm")
+                                        </span>
+                                    }
+
+                                    @if (match.HasSharpActivity)
+                                    {
+                                        <span class="sharp-tag">
+                                            <i class="fa-solid fa-bolt"></i> SMART MONEY DETECTADO
+                                        </span>
+                                    }
+                                </div>
+
+                                <div class="text-muted small">
+                                    <i class="fa-solid fa-location-dot me-1 text-info"></i> @match.Stadium
+                                </div>
+                            </div>
+
+                            <!-- Card Body -->
+                            <div class="match-body">
+                                
+                                <!-- Teams and Score Row -->
+                                <div class="teams-display">
+                                    <div class="team-row">
+                                        <div class="team-name-wrap">
+                                            <span class="team-logo">@match.HomeLogo</span>
+                                            <span>@match.HomeTeam</span>
+                                        </div>
+                                        @if (match.Status == Parlays.Models.EventStatus.Live)
+                                        {
+                                            <div class="score-display">@match.HomeScore - @match.AwayScore</div>
+                                        }
+                                    </div>
+                                    <div class="team-row">
+                                        <div class="team-name-wrap">
+                                            <span class="team-logo">@match.AwayLogo</span>
+                                            <span>@match.AwayTeam</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Markets & Odds Buttons Grid -->
+                                @foreach (var market in match.Markets)
+                                {
+                                    <div class="mt-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <small class="text-muted fw-bold">@market.DisplayName</small>
+                                            <small class="text-secondary" style="font-size:0.68rem;"><i class="fa-solid fa-rotate me-1 text-success"></i>Tiempo Real</small>
+                                        </div>
+
+                                        <div class="odds-grid">
+                                            @foreach (var opt in market.Options)
+                                            {
+                                                <button type="button" 
+                                                        class="odds-btn" 
+                                                        data-match-id="@match.Id"
+                                                        data-market-type="@market.MarketType"
+                                                        data-option-id="@opt.Id"
+                                                        data-american="@opt.CurrentAmerican"
+                                                        data-decimal="@opt.CurrentDecimal"
+                                                        data-probability="@opt.ImpliedProbability"
+                                                        onclick="toggleParlaySelection('@match.Id', '@match.HomeTeam vs @match.AwayTeam', '@market.MarketType', '@opt.Id', '@opt.Name', @opt.CurrentAmerican, @opt.CurrentDecimal)">
+                                                    
+                                                    <div class="odds-btn-label">@opt.Name</div>
+                                                    <div class="odds-btn-val-row">
+                                                        <span class="odds-val">@(opt.CurrentAmerican > 0 ? $"+{opt.CurrentAmerican}" : $"{opt.CurrentAmerican}")</span>
+                                                        
+                                                        @if (opt.ShiftPercentage > 0)
+                                                        {
+                                                            <span class="odds-shift-badge shift-up">▲ +@opt.ShiftPercentage%</span>
+                                                        }
+                                                        else if (opt.ShiftPercentage < 0)
+                                                        {
+                                                            <span class="odds-shift-badge shift-down">▼ @opt.ShiftPercentage%</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="odds-shift-badge shift-none">0.0%</span>
+                                                        }
+                                                    </div>
+                                                </button>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+
+                                <!-- Public vs Sharp Money Indicator Bar -->
+                                <div class="money-flow-section">
+                                    <div class="flow-title-row">
+                                        <span><i class="fa-solid fa-users me-1 text-info"></i> Boletos Públicos vs Dinero Fuerte</span>
+                                        <span><i class="fa-solid fa-scale-balanced me-1 text-warning"></i> Divergencia RLM</span>
+                                    </div>
+
+                                    <div class="flow-bar-row">
+                                        <div class="flow-labels">
+                                            <span class="text-info fw-bold">Público @match.HomeTeam: @match.PublicTicketsHomePercent%</span>
+                                            <span class="text-warning fw-bold">@match.AwayTeam: @match.PublicTicketsAwayPercent%</span>
+                                        </div>
+                                        <div class="flow-bar">
+                                            <div class="flow-segment-home" style="width: @match.PublicTicketsHomePercent%;"></div>
+                                            <div class="flow-segment-away" style="width: @match.PublicTicketsAwayPercent%;"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="flow-bar-row mb-0">
+                                        <div class="flow-labels">
+                                            <span class="text-success fw-bold">Dinero Real @match.HomeTeam: @match.MoneyHandleHomePercent%</span>
+                                            <span class="text-warning fw-bold">@match.AwayTeam: @match.MoneyHandleAwayPercent%</span>
+                                        </div>
+                                        <div class="flow-bar">
+                                            <div class="flow-segment-sharp" style="width: @match.MoneyHandleHomePercent%;"></div>
+                                            <div class="flow-segment-away" style="width: @match.MoneyHandleAwayPercent%;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Card Actions -->
+                                <div class="match-card-actions">
+                                    <button type="button" class="btn-chart-detail" onclick="openMatchChartModal('@match.Id')">
+                                        <i class="fa-solid fa-chart-line"></i> Ver Gráfico de Movimiento & Casas de Apuestas
+                                    </button>
+                                    
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge bg-dark text-secondary border border-secondary-subtle">
+                                            <i class="fa-solid fa-shield-halved text-success me-1"></i> Best: @(match.Sportsbooks.Count > 0 ? match.Sportsbooks[0].BookmakerName : "Consensus")
+                                        </span>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                }
+
+                <div id="noMatchesMessage" class="text-center py-5" style="display:none;">
+                    <div class="fs-1 text-muted mb-2"><i class="fa-solid fa-filter-circle-xmark"></i></div>
+                    <h5 class="text-white">No se encontraron eventos con estos filtros</h5>
+                    <p class="text-secondary small">Prueba cambiando la categoría deportiva o quitando el filtro de dinero inteligente.</p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: Interactive Sticky Parlay Builder Slip (4 Cols) -->
+        <div class="col-lg-4">
+            <div class="parlay-slip-card">
+                
+                <!-- Slip Header -->
+                <div class="parlay-slip-header">
+                    <div class="parlay-slip-title">
+                        <i class="fa-solid fa-receipt text-cyan"></i>
+                        <span>BOLETA DE PARLAY</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="parlay-legs-count" id="parlayLegsCount">0 Picks</span>
+                        <button type="button" class="btn btn-sm btn-link text-danger p-0 text-decoration-none" onclick="clearAllParlay()" title="Limpiar boleta">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div class="parlay-empty-state" id="parlayEmptyState">
+                    <div class="parlay-empty-icon">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </div>
+                    <h6 class="text-white fw-bold">Tu Parlay está vacío</h6>
+                    <p class="small text-secondary mb-0">Haz clic en cualquier momio de los partidos para agregarlo a tu boleta combinada.</p>
+                </div>
+
+                <!-- Active Legs List -->
+                <div class="parlay-legs-list" id="parlayLegsList"></div>
+
+                <!-- Parlay Calculation & Payout Section -->
+                <div class="parlay-summary-body" id="parlaySummarySection" style="display:none;">
+                    
+                    <div class="summary-row">
+                        <span>Momio Combinado Total:</span>
+                        <span class="summary-val-mono text-cyan" id="parlayCombinedOdds">+100</span>
+                    </div>
+
+                    <div class="summary-row">
+                        <span>Bonificación Vegas Boost:</span>
+                        <span class="boost-badge" id="parlayBonusBoost" style="display:none;">+7% BOOST</span>
+                    </div>
+
+                    <div class="summary-row">
+                        <span>Probabilidad Implícita:</span>
+                        <span class="summary-val-mono text-secondary" id="parlayImpliedProb">100%</span>
+                    </div>
+
+                    <!-- Stake Input -->
+                    <div class="mt-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="small text-muted fw-bold">Importe de Apuesta ($):</label>
+                            <small class="text-secondary">MXN / USD</small>
+                        </div>
+                        <div class="stake-input-wrap">
+                            <input type="number" id="parlayStakeInput" class="stake-input" value="100" min="10" step="10" oninput="onStakeChanged(this.value)">
+                        </div>
+                    </div>
+
+                    <!-- Quick Stakes -->
+                    <div class="quick-stakes">
+                        <button type="button" class="btn-quick-stake" onclick="setQuickStake(50)">$50</button>
+                        <button type="button" class="btn-quick-stake" onclick="setQuickStake(100)">$100</button>
+                        <button type="button" class="btn-quick-stake" onclick="setQuickStake(250)">$250</button>
+                        <button type="button" class="btn-quick-stake" onclick="setQuickStake(500)">$500</button>
+                        <button type="button" class="btn-quick-stake" onclick="setQuickStake(1000)">$1,000</button>
+                    </div>
+
+                    <!-- Payout Big Box -->
+                    <div class="payout-big-box">
+                        <div class="payout-label">Pago Potencial Total (Con Boost)</div>
+                        <div class="payout-amount" id="parlayFinalPayout">$0.00</div>
+                        <div class="small text-success mt-1">Ganancia Neta: <strong id="parlayProfit">+$0.00</strong></div>
+                    </div>
+
+                    <!-- Hedge Advisor Tip -->
+                    <div class="hedge-tip-box">
+                        <i class="fa-solid fa-lightbulb text-warning mt-1"></i>
+                        <span id="parlayHedgeAdvice">Calculando cobertura recomendada...</span>
+                    </div>
+
+                    <!-- Place Parlay Action -->
+                    <button type="button" class="btn-place-parlay mt-3" onclick="placeSimulatedBet()">
+                        <i class="fa-solid fa-bolt"></i> GUARDAR / SIMULAR PARLAY
+                    </button>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- MODAL: LINE MOVEMENT CHART & BOOKMAKER QUOTES -->
+<div class="modal fade" id="chartDetailModal" tabindex="-1" aria-labelledby="chartDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content terminal-modal">
+            <div class="modal-header terminal-modal-header">
+                <div>
+                    <h5 class="modal-title fw-bold text-white mb-0" id="modalMatchTitle">Real Madrid vs Manchester City</h5>
+                    <small class="text-secondary" id="modalMatchLeague">UEFA Champions League</small>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <div class="modal-body p-4">
+                
+                <!-- Option Selection Dropdown -->
+                <div class="row g-3 align-items-center mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label small text-muted fw-bold">Seleccionar Línea para Análisis:</label>
+                        <select class="form-select bg-dark text-white border-secondary" id="modalOptionSelect" onchange="onModalOptionChanged()"></select>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <span class="badge bg-dark border border-secondary text-info p-2">
+                            <i class="fa-solid fa-chart-line me-1"></i> Gráfico de Ticks en Vivo (SignalR)
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Chart Canvas Container -->
+                <div style="height: 280px; position: relative; background: #060a11; border: 1px solid var(--border-subtle); border-radius: 10px; padding: 12px;" class="mb-4">
+                    <canvas id="lineMovementChart"></canvas>
+                </div>
+
+                <!-- Money vs Tickets Flow Detail -->
+                <div class="row g-3 mb-4">
+                    <div class="col-6 col-md-3">
+                        <div class="p-3 bg-dark rounded border border-secondary text-center">
+                            <div class="small text-muted fw-bold">Boletos Casa</div>
+                            <div class="fs-5 fw-bold text-info" id="modalPublicTicketsHome">71%</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="p-3 bg-dark rounded border border-secondary text-center">
+                            <div class="small text-muted fw-bold">Boletos Visita</div>
+                            <div class="fs-5 fw-bold text-warning" id="modalPublicTicketsAway">29%</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="p-3 bg-dark rounded border border-secondary text-center">
+                            <div class="small text-muted fw-bold">Dinero Real Casa</div>
+                            <div class="fs-5 fw-bold text-success" id="modalMoneyHandleHome">44%</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="p-3 bg-dark rounded border border-secondary text-center">
+                            <div class="small text-muted fw-bold">Dinero Real Visita</div>
+                            <div class="fs-5 fw-bold text-warning" id="modalMoneyHandleAway">56%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Multi-Bookmaker Matrix Comparison -->
+                <h6 class="fw-bold text-white mb-2"><i class="fa-solid fa-building-columns text-cyan me-1"></i> Comparativa de Casas de Apuestas (Mejor Cuota)</h6>
+                <div class="table-responsive">
+                    <table class="bookmaker-quote-table">
+                        <thead>
+                            <tr>
+                                <th>Casa de Apuestas</th>
+                                <th>Local</th>
+                                <th>Empate</th>
+                                <th>Visitante</th>
+                                <th>Retorno (Payout)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bookmakerQuoteTableBody"></tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: +EV AND ARBITRAGE CALCULATORS -->
+<div class="modal fade" id="toolsModal" tabindex="-1" aria-labelledby="toolsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content terminal-modal">
+            <div class="modal-header terminal-modal-header">
+                <h5 class="modal-title fw-bold text-white"><i class="fa-solid fa-calculator text-cyan me-2"></i> Calculadoras Profesionales de Apuestas</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                
+                <ul class="nav nav-pills mb-3 gap-2" id="calcTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="ev-tab" data-bs-toggle="pill" data-bs-target="#ev-tab-pane" type="button" role="tab">
+                            <i class="fa-solid fa-percent me-1"></i> Valor Esperado (+EV)
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="arb-tab" data-bs-toggle="pill" data-bs-target="#arb-tab-pane" type="button" role="tab">
+                            <i class="fa-solid fa-scale-balanced me-1"></i> Arbitraje (Surebet)
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="calcTabContent">
+                    
+                    <!-- TAB 1: +EV Calculator -->
+                    <div class="tab-pane fade show active" id="ev-tab-pane" role="tabpanel">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label small text-muted fw-bold">Cuota Casa (Decimal):</label>
+                                <input type="number" id="evBookmakerOdds" class="form-control bg-dark text-white border-secondary" value="2.10" step="0.05" oninput="calculateExpectedValue()">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small text-muted fw-bold">Probabilidad Real Justa (%):</label>
+                                <input type="number" id="evFairProb" class="form-control bg-dark text-white border-secondary" value="52" min="1" max="100" oninput="calculateExpectedValue()">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small text-muted fw-bold">Importe Apuesta ($):</label>
+                                <input type="number" id="evStake" class="form-control bg-dark text-white border-secondary" value="100" oninput="calculateExpectedValue()">
+                            </div>
+                        </div>
+
+                        <div class="mt-4 p-3 bg-dark rounded border border-secondary text-center" id="evResultBox">
+                            <div class="small text-muted fw-bold">Valor Esperado Estimado (+EV)</div>
+                            <div id="evCalculatedVal" class="text-success fw-bold fs-4">+9.20% (+$9.20)</div>
+                            <div class="small text-secondary mt-1" id="evCalculatedDesc">¡Apuesta de Valor Positivo (+EV)! A largo plazo supera el margen de la casa.</div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: Arbitrage / Surebet Calculator -->
+                    <div class="tab-pane fade" id="arb-tab-pane" role="tabpanel">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label small text-muted fw-bold">Cuota Opción A (Casa 1):</label>
+                                <input type="number" id="arbOdds1" class="form-control bg-dark text-white border-secondary" value="2.15" step="0.05" oninput="calculateArbitrage()">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small text-muted fw-bold">Cuota Opción B (Casa 2):</label>
+                                <input type="number" id="arbOdds2" class="form-control bg-dark text-white border-secondary" value="2.05" step="0.05" oninput="calculateArbitrage()">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small text-muted fw-bold">Inversión Total ($):</label>
+                                <input type="number" id="arbTotalBank" class="form-control bg-dark text-white border-secondary" value="1000" oninput="calculateArbitrage()">
+                            </div>
+                        </div>
+
+                        <div class="mt-4 p-3 bg-dark rounded border border-secondary">
+                            <div class="text-center mb-3">
+                                <div class="small text-muted fw-bold">Resultado de Arbitraje</div>
+                                <div id="arbResultVal" class="text-success fw-bold fs-4">¡Oportunidad de Arbitraje! Ganancia: +4.88%</div>
+                            </div>
+                            <div class="row g-2 text-center">
+                                <div class="col-4">
+                                    <div class="small text-muted">Apostar en Casa 1</div>
+                                    <div class="fw-bold text-info" id="arbStake1">$488.10</div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="small text-muted">Apostar en Casa 2</div>
+                                    <div class="fw-bold text-warning" id="arbStake2">$511.90</div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="small text-muted">Ganancia Libre de Riesgo</div>
+                                    <div class="fw-bold text-success" id="arbNetProfit">+$49.41</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: BET PLACED / SAVED SUCCESS -->
+<div class="modal fade" id="betSuccessModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content terminal-modal text-center p-4">
+            <div class="my-3">
+                <div class="brand-icon mx-auto mb-3" style="width: 60px; height: 60px; font-size: 1.8rem; background: var(--accent-green);">
+                    <i class="fa-solid fa-check text-dark"></i>
+                </div>
+                <h4 class="fw-bold text-white">¡Parlay Simulado con Éxito!</h4>
+                <p class="text-secondary small">Tu combinación ha sido registrada en el tracker de momios para seguimiento de resultados y alertas de cobertura.</p>
+                <button type="button" class="btn btn-accent-cyber px-4 mt-2" data-bs-dismiss="modal">Entendido</button>
+            </div>
+        </div>
+    </div>
+</div>

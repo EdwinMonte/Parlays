@@ -1,0 +1,53 @@
+# Walkthrough: Plataforma Web de Movimientos de Momios y Parlays en C# (.NET)
+
+Se ha creado una plataforma web completa en **C# (.NET ASP.NET Core)** con arquitectura reactiva basada en **SignalR**, un motor de simulación en segundo plano y una interfaz de usuario deportiva/financiera estilo terminal Bloomberg/Vegas de alta gama.
+
+---
+
+## 🌟 Características Implementadas
+
+### 1. Backend en C# (.NET Core + WebSockets)
+- **`OddsEngineService.cs` (`BackgroundService`)**: Motor autónomo en segundo plano que actualiza momios en tiempo real cada 2-4 segundos, simula oscilaciones de mercado, ajusta probabilidades implícitas y detecta anomalías de volumen.
+- **`OddsHub.cs` (SignalR)**: Transmisión WebSocket sub-segundo a los clientes conectados para actualizar botones, gráficas y disparar alertas sin recargar la página.
+- **`ParlayCalculatorService.cs`**:
+  - Conversión bidireccional entre momios **Americanos**, **Decimales** y **Probabilidades Implícitas**.
+  - Cálculo de combinadas (Parlays), multiplicador progresivo **Vegas Boost** (+3% a +35% de bono según número de selecciones), sugerencias de cobertura (*Hedging*) y Criterio de Kelly / Valor Esperado (+EV).
+- **`OddsApiController.cs`**: Endpoints RESTful para consultar catálogo de eventos deportivos, historial temporal de ticks por selección, detalle de cuotas por casa de apuestas y cálculo de parlays.
+
+### 2. Diseño Visual & Experiencia de Usuario (UI/UX)
+- **Estética Terminal de Apuestas Pro**: Paleta obsidian oscura (`#06090f`, `#0d1522`), acentos neón esmeralda (`#00f59b`), cian ciber (`#00d2ff`) y alertas doradas/rojas.
+- **Animaciones en Vivo de Línea**:
+  - Destellos automáticos verdes (`flash-up`) cuando un momio sube (drift) y rojos (`flash-down`) cuando la línea cae por dinero fuerte (*steam move*).
+  - Efectos de micro-audio sintetizados con Web Audio API (activables con el botón de volumen).
+- **Ticker Superior en Tiempo Real**: Barra continua de movimientos rápidos y alertas de mercado en vivo.
+- **Indicador de Dinero Inteligente (RLM / Sharp Action)**:
+  - Visualización comparativa de **% de Boletos del Público vs % de Dinero Real** para detectar dónde están apostando los apostadores profesionales (*Sharps*).
+- **Boleta de Parlays Interactiva (Bet Slip)**:
+  - Adición/eliminación en 1 clic de selecciones.
+  - Calculador en vivo de pago potencial, bonificación de acumulador y consejos estratégicos de cobertura.
+- **Modal de Gráfico de Línea con Chart.js**:
+  - Gráfico interactivo con área sombreada en neón que traza la evolución de la cuota desde su apertura hasta el momento actual.
+  - Matriz comparativa entre casas de apuestas (**Bet365, Caliente.mx, Pinnacle, DraftKings, FanDuel**) destacando la mejor cuota disponible.
+- **Calculadoras +EV y Arbitraje (Surebet)** integradas en la barra de navegación.
+
+---
+
+## 🚀 Cómo Ejecutar y Acceder a la Aplicación
+
+La aplicación se encuentra activa y escuchando en:
+👉 **`http://localhost:5240`**
+
+Para ejecutarla manualmente en cualquier momento desde la terminal:
+```powershell
+cd "c:\Users\Edwin\OneDrive\Escritorio\Parlays"
+dotnet run --urls "http://localhost:5240"
+```
+
+---
+
+## 🧪 Pruebas y Validación Realizadas
+- [x] **Compilación .NET**: `dotnet build` ejecutado exitosamente con 0 errores y 0 advertencias.
+- [x] **Servidor Activo**: ASP.NET Core iniciado en `http://localhost:5240` con el servicio `OddsEngineService` transmitiendo actualizaciones.
+- [x] **Endpoints REST Verificados**:
+  - `GET /api/oddsapi/matches` -> Retorna catálogo con Champions League, Liga MX, NBA, NFL, MLB y Tenis.
+  - `POST /api/oddsapi/calculate-parlay` -> Cálculo validado de pagos y bonificación Vegas Boost.
