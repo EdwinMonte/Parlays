@@ -6,4 +6,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Cliente-Servidor-CSharp\**" />
+    <Compile Remove="Cliente-Servidor-Java\**" />
+    <EmbeddedResource Remove="Cliente-Servidor-CSharp\**" />
+    <EmbeddedResource Remove="Cliente-Servidor-Java\**" />
+    <None Remove="Cliente-Servidor-CSharp\**" />
+    <None Remove="Cliente-Servidor-Java\**" />
+  </ItemGroup>
+
 </Project>

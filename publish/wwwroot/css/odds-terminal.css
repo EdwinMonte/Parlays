@@ -1,0 +1,980 @@
+/* =========================================================
+   ODDSPULSE PRO - MODERN BETTING TERMINAL DESIGN SYSTEM
+   ========================================================= */
+
+:root {
+    --bg-darkest: #06090f;
+    --bg-primary: #0a0f18;
+    --bg-surface: #101726;
+    --bg-surface-hover: #172238;
+    --bg-card: #0d1522;
+    --bg-card-header: #121c2d;
+    --border-subtle: #1e2c45;
+    --border-bright: #2d4166;
+    
+    --text-main: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+
+    /* Accent & Financial Colors */
+    --accent-green: #00f59b;
+    --accent-green-glow: rgba(0, 245, 155, 0.25);
+    --accent-red: #ff3366;
+    --accent-red-glow: rgba(255, 51, 102, 0.25);
+    --accent-cyan: #00d2ff;
+    --accent-cyan-glow: rgba(0, 210, 255, 0.2);
+    --accent-yellow: #ffb703;
+    --accent-purple: #a855f7;
+
+    --font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    --radius-xl: 22px;
+
+    --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.5);
+    --shadow-glow-green: 0 0 15px rgba(0, 245, 155, 0.35);
+    --shadow-glow-red: 0 0 15px rgba(255, 51, 102, 0.35);
+    --shadow-glow-cyan: 0 0 15px rgba(0, 210, 255, 0.35);
+}
+
+body.terminal-body {
+    background-color: var(--bg-darkest);
+    color: var(--text-main);
+    font-family: var(--font-body);
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    background-image: 
+        radial-gradient(circle at 15% 15%, rgba(0, 210, 255, 0.04) 0%, transparent 40%),
+        radial-gradient(circle at 85% 75%, rgba(0, 245, 155, 0.04) 0%, transparent 40%);
+    background-attachment: fixed;
+}
+
+/* =========================================================
+   TOP LIVE TICKER
+   ========================================================= */
+.odds-ticker-wrap {
+    background: #04060a;
+    border-bottom: 1px solid var(--border-subtle);
+    height: 38px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+    z-index: 1040;
+}
+
+.ticker-label {
+    background: #0e1624;
+    color: #ff4757;
+    font-weight: 800;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    padding: 0 16px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-right: 1px solid var(--border-subtle);
+    white-space: nowrap;
+    z-index: 2;
+}
+
+.pulse-dot {
+    width: 8px;
+    height: 8px;
+    background-color: #ff4757;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #ff4757;
+    animation: pulseGlow 1.5s infinite;
+}
+
+.ticker-track {
+    display: flex;
+    gap: 32px;
+    white-space: nowrap;
+    animation: marquee 35s linear infinite;
+    padding-left: 20px;
+}
+
+.ticker-track:hover {
+    animation-play-state: paused;
+}
+
+.ticker-item {
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+}
+
+.sport-badge {
+    background: #1e293b;
+    color: var(--accent-cyan);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.odds-up {
+    color: var(--accent-green);
+    font-family: var(--font-mono);
+    font-weight: 700;
+}
+
+.odds-down {
+    color: var(--accent-red);
+    font-family: var(--font-mono);
+    font-weight: 700;
+}
+
+@keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}
+
+@keyframes pulseGlow {
+    0% { transform: scale(0.9); opacity: 0.7; }
+    50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 12px #ff4757; }
+    100% { transform: scale(0.9); opacity: 0.7; }
+}
+
+/* =========================================================
+   NAVBAR & HEADER
+   ========================================================= */
+.terminal-navbar {
+    background: rgba(10, 15, 24, 0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 12px 0;
+}
+
+.brand-icon {
+    width: 38px;
+    height: 38px;
+    background: linear-gradient(135deg, var(--accent-cyan), #3b82f6);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    font-size: 1.2rem;
+    box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
+}
+
+.brand-title {
+    font-family: var(--font-heading);
+    font-size: 1.35rem;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    color: #ffffff;
+}
+
+.brand-accent {
+    color: var(--accent-cyan);
+}
+
+.brand-subtitle {
+    display: block;
+    font-size: 0.62rem;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    font-weight: 700;
+}
+
+.nav-pills .nav-link {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s ease;
+}
+
+.nav-pills .nav-link:hover {
+    color: #fff;
+    background: var(--bg-surface);
+}
+
+.nav-pills .nav-link.active {
+    color: #000;
+    background: var(--accent-cyan);
+    font-weight: 700;
+    box-shadow: 0 0 12px rgba(0, 210, 255, 0.4);
+}
+
+.btn-outline-cyber {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    font-weight: 600;
+    font-family: var(--font-mono);
+    padding: 6px 12px;
+    transition: all 0.2s ease;
+}
+
+.btn-outline-cyber:hover, .btn-outline-cyber.active {
+    background: var(--border-bright);
+    color: #fff;
+    border-color: var(--accent-cyan);
+}
+
+.btn-icon-terminal {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.btn-icon-terminal:hover {
+    color: var(--accent-yellow);
+    border-color: var(--accent-yellow);
+}
+
+.btn-accent-cyber {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    border: 1px solid #3b82f6;
+    color: #fff;
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 7px 16px;
+    border-radius: var(--radius-sm);
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+    transition: all 0.2s ease;
+}
+
+.btn-accent-cyber:hover {
+    background: linear-gradient(135deg, #1d4ed8, #1e40af);
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.45);
+}
+
+/* =========================================================
+   HERO / BANNER STATS BAR
+   ========================================================= */
+.market-summary-bar {
+    background: linear-gradient(180deg, #0e1626, #090e17);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 16px 24px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-card);
+}
+
+.stat-box-terminal {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.stat-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+.stat-icon.green {
+    background: rgba(0, 245, 155, 0.12);
+    color: var(--accent-green);
+    border: 1px solid rgba(0, 245, 155, 0.25);
+}
+
+.stat-icon.red {
+    background: rgba(255, 51, 102, 0.12);
+    color: var(--accent-red);
+    border: 1px solid rgba(255, 51, 102, 0.25);
+}
+
+.stat-icon.cyan {
+    background: rgba(0, 210, 255, 0.12);
+    color: var(--accent-cyan);
+    border: 1px solid rgba(0, 210, 255, 0.25);
+}
+
+.stat-icon.gold {
+    background: rgba(255, 184, 0, 0.12);
+    color: var(--accent-yellow);
+    border: 1px solid rgba(255, 184, 0, 0.25);
+}
+
+.stat-label {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+}
+
+.stat-val {
+    font-size: 1.35rem;
+    font-weight: 800;
+    font-family: var(--font-heading);
+    color: #fff;
+    line-height: 1.1;
+}
+
+/* =========================================================
+   MATCH CARDS & ODDS MATRIX
+   ========================================================= */
+.match-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    margin-bottom: 20px;
+    overflow: hidden;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+.match-card:hover {
+    border-color: var(--border-bright);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+}
+
+.match-card.is-live {
+    border-left: 4px solid #ff4757;
+}
+
+.match-card.has-sharp {
+    border-top: 2px solid var(--accent-yellow);
+}
+
+.match-header {
+    background: var(--bg-card-header);
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-subtle);
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.league-tag {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.live-badge {
+    background: #ff4757;
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    animation: livePulse 2s infinite;
+}
+
+@keyframes livePulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.sharp-tag {
+    background: rgba(255, 184, 0, 0.15);
+    border: 1px solid rgba(255, 184, 0, 0.4);
+    color: var(--accent-yellow);
+    font-size: 0.68rem;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.match-body {
+    padding: 20px;
+}
+
+.teams-display {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.team-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.team-name-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.team-logo {
+    font-size: 1.2rem;
+}
+
+.score-display {
+    font-family: var(--font-mono);
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #fff;
+    background: #090e17;
+    padding: 2px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border-subtle);
+}
+
+/* ODDS BUTTONS & TILES */
+.odds-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.odds-btn {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+}
+
+.odds-btn:hover {
+    background: var(--bg-surface-hover);
+    border-color: var(--accent-cyan);
+    transform: translateY(-2px);
+}
+
+.odds-btn.selected {
+    background: rgba(0, 210, 255, 0.12);
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 12px rgba(0, 210, 255, 0.35);
+}
+
+.odds-btn-label {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.odds-btn-val-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+}
+
+.odds-val {
+    font-family: var(--font-mono);
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #ffffff;
+    transition: color 0.3s ease;
+}
+
+.odds-shift-badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    padding: 1px 4px;
+    border-radius: 3px;
+}
+
+.shift-up {
+    background: rgba(0, 245, 155, 0.15);
+    color: var(--accent-green);
+}
+
+.shift-down {
+    background: rgba(255, 51, 102, 0.15);
+    color: var(--accent-red);
+}
+
+.shift-none {
+    background: rgba(148, 163, 184, 0.1);
+    color: var(--text-muted);
+}
+
+/* REAL-TIME FLASH ANIMATIONS */
+.flash-up {
+    animation: flashGreen 1.4s ease-out;
+}
+
+.flash-down {
+    animation: flashRed 1.4s ease-out;
+}
+
+@keyframes flashGreen {
+    0% { background-color: rgba(0, 245, 155, 0.55); border-color: var(--accent-green); box-shadow: var(--shadow-glow-green); }
+    100% { background-color: var(--bg-surface); }
+}
+
+@keyframes flashRed {
+    0% { background-color: rgba(255, 51, 102, 0.55); border-color: var(--accent-red); box-shadow: var(--shadow-glow-red); }
+    100% { background-color: var(--bg-surface); }
+}
+
+/* PUBLIC VS SMART MONEY BARS */
+.money-flow-section {
+    background: #080d16;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 12px 16px;
+    margin-top: 16px;
+}
+
+.flow-title-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.flow-bar-row {
+    margin-bottom: 8px;
+}
+
+.flow-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    margin-bottom: 3px;
+}
+
+.flow-bar {
+    height: 6px;
+    border-radius: 4px;
+    background: #1a2333;
+    overflow: hidden;
+    display: flex;
+}
+
+.flow-segment-home {
+    background: linear-gradient(90deg, #3b82f6, var(--accent-cyan));
+    height: 100%;
+}
+
+.flow-segment-away {
+    background: linear-gradient(90deg, var(--accent-yellow), #f97316);
+    height: 100%;
+}
+
+.flow-segment-sharp {
+    background: linear-gradient(90deg, var(--accent-green), #10b981);
+    height: 100%;
+}
+
+/* CARD FOOTER ACTIONS */
+.match-card-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 14px;
+    margin-top: 14px;
+    border-top: 1px solid var(--border-subtle);
+}
+
+.btn-chart-detail {
+    background: transparent;
+    border: 1px solid var(--border-subtle);
+    color: var(--accent-cyan);
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.btn-chart-detail:hover {
+    background: rgba(0, 210, 255, 0.1);
+    border-color: var(--accent-cyan);
+    color: #fff;
+}
+
+/* =========================================================
+   PARLAY BUILDER SLIP (SIDEBAR / FLOATING DRAWER)
+   ========================================================= */
+.parlay-slip-card {
+    background: #0c1421;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    position: sticky;
+    top: 90px;
+    overflow: hidden;
+}
+
+.parlay-slip-header {
+    background: linear-gradient(135deg, #131d2e, #0c1421);
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.parlay-slip-title {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.parlay-legs-count {
+    background: var(--accent-cyan);
+    color: #000;
+    font-size: 0.72rem;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: 12px;
+}
+
+.parlay-legs-list {
+    max-height: 280px;
+    overflow-y: auto;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.parlay-leg-item {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    position: relative;
+    transition: border-color 0.2s ease;
+}
+
+.parlay-leg-item:hover {
+    border-color: var(--border-bright);
+}
+
+.leg-remove-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: color 0.2s;
+}
+
+.leg-remove-btn:hover {
+    color: var(--accent-red);
+}
+
+.leg-match-title {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-bottom: 2px;
+    padding-right: 18px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.leg-selection {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.leg-odds {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--accent-green);
+    margin-left: 6px;
+}
+
+.parlay-empty-state {
+    padding: 35px 20px;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.parlay-empty-icon {
+    font-size: 2.2rem;
+    color: var(--border-bright);
+    margin-bottom: 12px;
+}
+
+.parlay-summary-body {
+    background: #080d16;
+    border-top: 1px solid var(--border-subtle);
+    padding: 18px 20px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.82rem;
+    margin-bottom: 8px;
+    color: var(--text-secondary);
+}
+
+.summary-val-mono {
+    font-family: var(--font-mono);
+    font-weight: 800;
+    color: #fff;
+}
+
+.boost-badge {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #000;
+    font-weight: 800;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.payout-big-box {
+    background: linear-gradient(135deg, rgba(0, 245, 155, 0.08), rgba(0, 210, 255, 0.08));
+    border: 1px solid rgba(0, 245, 155, 0.3);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    margin: 14px 0;
+    text-align: center;
+}
+
+.payout-label {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.payout-amount {
+    font-family: var(--font-mono);
+    font-size: 1.7rem;
+    font-weight: 900;
+    color: var(--accent-green);
+    letter-spacing: -0.5px;
+    text-shadow: 0 0 20px rgba(0, 245, 155, 0.4);
+}
+
+.stake-input-wrap {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.stake-input {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    color: #fff;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 1rem;
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    width: 100%;
+}
+
+.stake-input:focus {
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 10px rgba(0, 210, 255, 0.3);
+    outline: none;
+    background: var(--bg-surface);
+    color: #fff;
+}
+
+.quick-stakes {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+.btn-quick-stake {
+    flex: 1;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    padding: 4px 0;
+    border-radius: 4px;
+    transition: all 0.15s;
+}
+
+.btn-quick-stake:hover {
+    background: var(--border-bright);
+    color: #fff;
+    border-color: var(--accent-cyan);
+}
+
+.btn-place-parlay {
+    width: 100%;
+    background: linear-gradient(135deg, var(--accent-green), #059669);
+    border: none;
+    color: #061912;
+    font-family: var(--font-heading);
+    font-weight: 900;
+    font-size: 1.05rem;
+    padding: 12px;
+    border-radius: var(--radius-md);
+    box-shadow: 0 6px 20px rgba(0, 245, 155, 0.35);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-place-parlay:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 245, 155, 0.5);
+    background: linear-gradient(135deg, #10fba6, #047857);
+}
+
+.hedge-tip-box {
+    margin-top: 12px;
+    background: rgba(168, 85, 247, 0.1);
+    border: 1px solid rgba(168, 85, 247, 0.25);
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+    font-size: 0.72rem;
+    color: #d8b4fe;
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+}
+
+/* =========================================================
+   MODALS (CHART DETAIL & CALCULATORS)
+   ========================================================= */
+.modal-content.terminal-modal {
+    background: #0a0f19;
+    border: 1px solid var(--border-bright);
+    border-radius: var(--radius-xl);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85);
+    color: #fff;
+}
+
+.modal-header.terminal-modal-header {
+    background: #0f1726;
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 18px 24px;
+}
+
+.bookmaker-quote-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+}
+
+.bookmaker-quote-table th {
+    background: #080d16;
+    color: var(--text-muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.5px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.bookmaker-quote-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #141f33;
+}
+
+.best-odds-badge {
+    background: rgba(0, 245, 155, 0.2);
+    color: var(--accent-green);
+    border: 1px solid var(--accent-green);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-weight: 800;
+    font-family: var(--font-mono);
+}
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+.terminal-footer {
+    background: #04060a;
+    border-top: 1px solid var(--border-subtle);
+    padding: 16px 0;
+    margin-top: 40px;
+}
+
+.status-indicator-live {
+    width: 8px;
+    height: 8px;
+    background: var(--accent-green);
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 8px var(--accent-green);
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #06090f;
+}
+::-webkit-scrollbar-thumb {
+    background: #1e2c45;
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #2d4166;
+}
